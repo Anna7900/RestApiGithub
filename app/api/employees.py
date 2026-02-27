@@ -1,75 +1,74 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
 
-employees_bp = Blueprint("employees", __name__)
+students_bp = Blueprint("students", __name__)
 
-employees = []
+students = []
 current_id = 1
 
-@employees_bp.route("", methods=["POST"])
+
+@students_bp.route("", methods=["POST"])
 @jwt_required()
-def create_employee():
+def create_student():
     global current_id
+
     data = request.get_json() or {}
 
-    employee = {
+    student = {
         "id": current_id,
-        "FirstName": data.get("FirstName", ""),
-        "LastName": data.get("LastName", ""),
-        "Gender": data.get("Gender", ""),
-        "DateOfBirth": data.get("DateOfBirth", ""),
-        "DepartmentID": data.get("DepartmentID", "")
+        "name": data.get("name", ""),
+        "email": data.get("email", ""),
+        "course": data.get("course", "")
     }
 
-    employees.append(employee)
+    students.append(student)
     current_id += 1
 
-    return jsonify({"student": employee}), 201
+    return jsonify({"student": student}), 201
 
 
-@employees_bp.route("", methods=["GET"])
+@students_bp.route("", methods=["GET"])
 @jwt_required()
-def list_employees():
+def list_students():
     return jsonify({
-        "count": len(employees),
-        "students": employees
+        "count": len(students),
+        "students": students
     }), 200
 
 
-@employees_bp.route("/<int:employee_id>", methods=["GET"])
+@students_bp.route("/<int:student_id>", methods=["GET"])
 @jwt_required()
-def get_employee(employee_id):
-    for emp in employees:
-        if emp["id"] == employee_id:
-            return jsonify({"student": emp}), 200
+def get_student(student_id):
+    for student in students:
+        if student["id"] == student_id:
+            return jsonify(student), 200   # ✅ FIXED HERE
 
-    return jsonify({"message": "Not found"}), 404
+    return jsonify({"message": "Student not found"}), 404
 
 
-@employees_bp.route("/<int:employee_id>", methods=["PUT"])
+@students_bp.route("/<int:student_id>", methods=["PUT"])
 @jwt_required()
-def update_employee(employee_id):
+def update_student(student_id):
     data = request.get_json() or {}
 
-    for emp in employees:
-        if emp["id"] == employee_id:
-            emp["FirstName"] = data.get("FirstName", emp["FirstName"])
-            emp["LastName"] = data.get("LastName", emp["LastName"])
-            emp["Gender"] = data.get("Gender", emp["Gender"])
-            emp["DateOfBirth"] = data.get("DateOfBirth", emp["DateOfBirth"])
-            emp["DepartmentID"] = data.get("DepartmentID", emp["DepartmentID"])
-            return jsonify({"student": emp}), 200
+    for student in students:
+        if student["id"] == student_id:
+            student["name"] = data.get("name", student["name"])
+            student["email"] = data.get("email", student["email"])
+            student["course"] = data.get("course", student["course"])
+            return jsonify({"student": student}), 200
 
-    return jsonify({"message": "Not found"}), 404
+    return jsonify({"message": "Student not found"}), 404
 
 
-@employees_bp.route("/<int:employee_id>", methods=["DELETE"])
+@students_bp.route("/<int:student_id>", methods=["DELETE"])
 @jwt_required()
-def delete_employee(employee_id):
-    global employees
-    for emp in employees:
-        if emp["id"] == employee_id:
-            employees = [e for e in employees if e["id"] != employee_id]
-            return jsonify({"message": "Deleted"}), 200
+def delete_student(student_id):
+    global students
 
-    return jsonify({"message": "Not found"}), 404
+    for student in students:
+        if student["id"] == student_id:
+            students = [s for s in students if s["id"] != student_id]
+            return jsonify({"message": "Student deleted"}), 200
+
+    return jsonify({"message": "Student not found"}), 404
